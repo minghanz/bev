@@ -28,8 +28,14 @@ class Calib(FrozenClass):
         self.H_world_img = None#np.zeros((3,3), dtype=np.float32)
         self.H_img_world = None#np.zeros((3,3), dtype=np.float32)
 
+        self.mode = None
         self._freeze()
         self.__dict__.update(kwargs)
+
+        if self.pts_image is not None and self.pts_world is not None:
+            self.mode = "from_pts"
+        else:
+            self.mode = "from_KRt"
 
         self.update()
         self.check_validity()

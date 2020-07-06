@@ -61,9 +61,17 @@ class BEVWorldSpec(FrozenClass):
     def gen_H_world_bev(self):
         self.check_validity()
 
-        pts_world = np.array([[self.x_min, self.y_min], [self.x_min, self.y_max], [self.x_max, self.y_max], [self.x_max, self.y_min]], dtype=np.float)
         pts_img = np.array([[0, 0], [0, self.v_size], [self.u_size, self.v_size], [self.u_size, 0]], dtype=np.float)
-        
+        pts_world = self.gen_bev_corners_in_world()
+
+        H_world_bev = homo_from_pts(pts_img, pts_world)
+
+        return H_world_bev
+
+    def gen_bev_corners_in_world(self):
+
+        pts_world = np.array([[self.x_min, self.y_min], [self.x_min, self.y_max], [self.x_max, self.y_max], [self.x_max, self.y_min]], dtype=np.float)
+
         if self.u_axis == "x" and self.v_axis == "y":
             world_idx = [0,1,2,3]
         elif self.u_axis == "x" and self.v_axis == "-y":
@@ -84,9 +92,8 @@ class BEVWorldSpec(FrozenClass):
             raise ValueError("illegal u_axis and v_axis combo", u_axis, v_axis)
         pts_world = pts_world[world_idx]
 
-        H_world_bev = homo_from_pts(pts_img, pts_world)
+        return pts_world
 
-        return H_world_bev
 
 if __name__ == "__main__":
     bev_world_spec = BEVWorldSpec(x_size=10)

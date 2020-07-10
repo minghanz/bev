@@ -16,7 +16,8 @@ def grid_pts_pair_from_grid_coords(grid_x, grid_y):
     grid_pts_pairs = np.array(grid_pts_pairs)
     return grid_pts_pairs
 
-def draw_homography_tool(img, H_img_world, grid_x, grid_y):
+def draw_homography(img, H_img_world, grid_x, grid_y):
+    """This function draws grid and coordinate arrows to visualize homography"""
     grid_color = (0,0,0)
     grid_pts_pairs = grid_pts_pair_from_grid_coords(grid_x, grid_y) # n*2*2
     grid_pts_pairs = np.dstack((grid_pts_pairs, np.ones((grid_pts_pairs.shape[0], 2, 1), dtype=grid_pts_pairs.dtype)) ) # n*2*3
@@ -42,6 +43,7 @@ def draw_homography_tool(img, H_img_world, grid_x, grid_y):
     return img
 
 def draw_bev_axis(img, pt_lt_corner, pt_lb_corner, pt_rt_corner):
+    """This function draws coordinate arrows given three points"""
 
     u_vec = pt_rt_corner - pt_lt_corner
     v_vec = pt_lb_corner - pt_lt_corner
@@ -77,7 +79,7 @@ def vis_bspec_and_calib_in_grid(img, bspec, calib=None):
         H_world_img = bspec.gen_H_world_bev()
 
     H_img_world = np.linalg.inv(H_world_img)
-    img = draw_homography_tool(img, H_img_world, grid_x, grid_y)
+    img = draw_homography(img, H_img_world, grid_x, grid_y)
 
     if calib is not None:
         pts_world = bspec.gen_bev_corners_in_world()
@@ -89,3 +91,15 @@ def vis_bspec_and_calib_in_grid(img, bspec, calib=None):
         img = draw_bev_axis(img, pt_lt_corner, pt_lb_corner, pt_rt_corner)
 
     return img
+
+if __name__ == "__main__":
+
+    img_path = "/media/sda1/datasets/extracted/KoPER/added/SK_1_empty_road_bev.png"
+    # img_path = "/media/sda1/datasets/extracted/KoPER/Sequence1a/KAB_SK_1_undist/KAB_SK_1_undist_1384779301359985.bmp"
+    # img_path = "/media/sda1/datasets/extracted/KoPER/Sequence1a/KAB_SK_4_undist/KAB_SK_4_undist_1384779301359985.bmp"
+    img = cv2.imread(img_path)
+
+    img = vis_bspec_and_calib_in_grid(img, bspec)
+    # img = vis_bspec_and_calib_in_grid(img, bspec, calib)
+    cv2.imshow("img", img)
+    cv2.waitKey()

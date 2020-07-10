@@ -1,7 +1,7 @@
 import numpy as np
 
 from .frozen_class import FrozenClass
-from .homography import homo_from_pts
+from .homo import homo_from_pts
 
 class BEVWorldSpec(FrozenClass):
     def __init__(self, u_size, v_size,  **kwargs):

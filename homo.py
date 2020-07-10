@@ -5,6 +5,8 @@ import cv2
 def homo_from_KRt(K, R=None, t=None, Rt_homo=None):
     """we assume that in the world coordinate z=0 represent the plane
     the Rt is such that pt_target = H*pt_source, H = K(3*3)*Rt[:3, [0,1,3]]"""
+    if K.shape[1] == 4:
+        K = K[:, :3]
     if Rt_homo is not None:
         assert R is None and t is None
         Rt = Rt_homo[:, [0,1,3]]

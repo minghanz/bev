@@ -2,7 +2,7 @@ import numpy as np
 import os
 
 from .frozen_class import FrozenClass
-from .homography import homo_from_KRt, homo_from_pts
+from .homo import homo_from_KRt, homo_from_pts
 
 class Calib(FrozenClass):
     def __init__(self, **kwargs):
@@ -71,8 +71,11 @@ class Calib(FrozenClass):
             assert self.pts_image is not None and self.pts_world is not None
 
 
-    def gen_H_world_img(self, mode):
+    def gen_H_world_img(self, mode=None):
         self.check_validity()
+        if mode is None:
+            mode = self.mode
+            
         assert mode in ["from_KRt", "from_pts"]
 
         if mode == "from_pts":

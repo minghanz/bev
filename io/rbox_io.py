@@ -1,14 +1,17 @@
 import numpy as np
 
-from ..converter.rbox_cvt import blender2world, bev2coco
+from ..converter.rbox_cvt import blender2world, bev2coco, kitti2world
 from ..rbox import rbox_world_bev
 
-import sys
-sys.path.append("../../")
-from cvo_ops.utils_general.io import read_calib_file
+# import sys
+# sys.path.append("../../")
+# from cvo_ops.utils_general.io import read_calib_file
+
+from .utils import read_txt_to_dict
 
 def write_txt_coco(anno_coco, txt_path):
     ### write txt in yolo format 
+    ### exclude out-of-view boxes
 
     with open(txt_path, "w") as f:
         for i in range(anno_coco.shape[0]):
@@ -39,7 +42,7 @@ def read_txt_yolo_pred(txt_source, rbox_type):
 
 def read_txt_blender(txt_source):
     ##### generate annotation file in the format of yolov3 as described in https://github.com/ultralytics/yolov3/wiki/Train-Custom-Data
-    txt_content = read_calib_file(txt_source)
+    txt_content = read_txt_to_dict(txt_source) # read_calib_file
     # with open(txt_target, "w") as f:
     n_obj = len([key for key in txt_content if "center" in key])
     anno_blender = np.zeros((n_obj, 5))
@@ -79,5 +82,23 @@ def read_txt_blender_to_coco(txt_source, H_world2bev, width, height):
 
     #     x,y,w,l,yaw = xywhr_world2bev(center[0],center[1],w,l,yaw,H_world2bev)
     #     anno_coco[i] = 0, x/width, y/height, w/width, l/height, yaw
+
+    return anno_coco
+
+def read_txt_kitti_to_coco(txt_source, H_world2bev, width, height):
+    ### kitti cam coordinate: x-right, y-down, z-front
+    with open(txt_source) as f:
+        lines = f.readlines()
+
+    class_names = [line.split()[0] for line in lines]
+    wanted_names = ["Car", "Van", "Truck"]
+    wanted_items = [x in wanted_names for x in class_names]
+
+    rbox_hwlxyzr = np.array([[float(x) for x in line.split()[8:15]] for line in lines])
+    rbox_hwlxyzr = rbox_hwlxyzr[wanted_items]
+
+    xywhr = kitti2world(rbox_hwlxyzr)
+    anno_bev = rbox_world_bev(xywhr, H_world2bev, src="world")
+    anno_coco = bev2coco(anno_bev, width, height)
 
     return anno_coco

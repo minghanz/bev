@@ -2,7 +2,11 @@ import numpy as np
 import cv2
 
 def vis_kpts(img, pts, H=None):
-    """visualize keypoints, which should be n*4*2 ndarray or 4*2 array"""
+    """visualize keypoints, which should be n*4*2(or 3) ndarray or 4*2(or 3) array"""
+
+    if pts.shape[-1] == 3:
+        assert (pts[..., -1] <=1).all(), "last dim should be confidence: \n{}".format(pts)
+        pts = pts[..., :2]
 
     assert pts.shape[-1] == 2, "pts should be n*4*2 or 4*2 ndarray, {}".format(pts.shape)
 

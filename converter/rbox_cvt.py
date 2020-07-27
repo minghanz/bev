@@ -36,3 +36,12 @@ def world2blender(xywhr):
     xywhr_new[:, 4] -= np.pi/2
 
     return xywhr_new
+
+def kitti2world(rbox_hwlxyzr):
+
+    ### kitti cam coordinate: x-right, y-down, z-front, r=0 when vehicle facing right, facing front as 90 degree 
+
+    xywhr = rbox_hwlxyzr[:, [3,5,1,2,6]].copy()
+    xywhr[:,-1] = -xywhr[:,-1]
+
+    return xywhr

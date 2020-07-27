@@ -1,1 +1,1 @@
-__all__ = ["io_vis"]
+__all__ = ["io_vis", "compo"]

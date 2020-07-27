@@ -23,7 +23,7 @@ def preset_calib(dataset_name, sub_id=None):
     return calib
 
 def preset_bspec(dataset_name, sub_id=None):
-    assert dataset_name in ["lturn", "KoPER"]
+    assert dataset_name in ["lturn", "KoPER", "kitti"]
 
     if dataset_name == "lturn":
         #### world to bev homography
@@ -46,6 +46,14 @@ def preset_bspec(dataset_name, sub_id=None):
 
         spec_dict = load_spec_dict_bev(bev_width, bev_height, dataset_name, sub_id)
         bspec = BEVWorldSpec(**spec_dict)
+
+    elif dataset_name == "kitti":
+        bev_width = 224#192#384
+        bev_height = 544#512#576
+        # bspec = bev.bev.BEVWorldSpec(u_size=400, v_size=800, u_axis="x", v_axis="-y", x_min=-10, x_max=10, y_min=6, y_max=46)
+        # bspec = BEVWorldSpec(u_size=bev_width, v_size=bev_height, u_axis="x", v_axis="-y", x_min=-20, x_max=20, y_min=6, y_max=66)
+        # bspec = BEVWorldSpec(u_size=bev_width, v_size=bev_height, u_axis="x", v_axis="-y", x_min=-15, x_max=15, y_min=6, y_max=86)
+        bspec = BEVWorldSpec(u_size=bev_width, v_size=bev_height, u_axis="x", v_axis="-y", x_min=-14, x_max=14, y_min=6, y_max=74)
 
     return bspec
 

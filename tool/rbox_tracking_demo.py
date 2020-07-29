@@ -28,7 +28,7 @@ if __name__ == "__main__":
     dets, frame_ids = read_txt_yolo_pred(pred_path, "xy8")
     dets_xywhr = xy82xywhr(dets, "bev")
 
-    for i, frame in enumerate(video_parser(video_path)):
+    for frame, i in video_parser(video_path):
         detections = dets_xywhr[frame_ids==i]
         detections_world = rbox_world_bev(detections, H_world_bev, "bev")
 

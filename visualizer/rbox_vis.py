@@ -11,6 +11,10 @@ def vis_rbox(img, rboxes, mode="bev", H=None, txts=None, rbox_color=None, txt_co
     txts is optional, if given, should be a list of strings, len(txts) == rboxes.shape[0]
     rbox_color is optional, should be a tuple or list of length 3 between 0 and 255 """
 
+    img_drawon = img.copy()
+    if len(rboxes)==0:
+        return img_drawon
+        
     assert rboxes[:,:4].max() > 2, "Please unnormalize rboxes before visualization"
     assert mode in ["bev", "world"]
 
@@ -26,7 +30,6 @@ def vis_rbox(img, rboxes, mode="bev", H=None, txts=None, rbox_color=None, txt_co
     else:
         raise ValueError("rboxes shape not recognized: {}".format(rboxes.shape))
 
-    img_drawon = img.copy()
 
     ### get coordinate of vertices
     if rbox_type == "xywhr":

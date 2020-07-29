@@ -55,14 +55,14 @@ def write_dict_to_txt(path, dict_obj):
     return
 
 
-def video_generator(video_name, height, width, img_folder=None):
+def video_generator(video_name, height, width, img_folder=None, fps=30):
     video = cv2.VideoWriter(
                 filename=video_name,
                 # some installation of opencv may not support x264 (due to its license),
                 # you can try other format (e.g. MPEG)
                 # fourcc = cv2.VideoWriter_fourcc('M','J','P','G'),
                 fourcc=cv2.VideoWriter_fourcc(*"x264"),
-                fps=float(30),
+                fps=float(fps),
                 frameSize=(width, height),
                 isColor=True,
             )
@@ -90,19 +90,29 @@ def frame_from_video(video):
             break
 
 def video_parser(video_name, img_folder=None, start_id=-1, end_id=-1 ):
-    """start_id and end_id are only effective when img_folder is not None. """
+    """start_id and end_id are only effective when img_folder is not None. 
+    yield image and frame_id"""
     video = cv2.VideoCapture(video_name)
 
-    if img_folder is None:
-        return frame_from_video(video)
-    else:
-        for i, im in enumerate(tqdm(frame_from_video(video))):
-            if i < start_fid:
-                continue
-            if end_fid > 0 and i >= end_fid:
-                break
+    for i, im in enumerate(tqdm(frame_from_video(video))):
+        if i < start_id:
+            continue
+        if end_id > 0 and i >= end_id:
+            break
+        if img_folder is not None:
             fname = '{:010d}.jpg'.format(i)
             cv2.imwrite(os.path.join(img_folder, fname), im)
             # print('finished:', i)
+        else:
+            yield im, i
 
     video.release()
+
+def folder_parser(path):
+    """yield image and file path"""
+    imgs = os.listdir(path)
+    imgs = sorted(imgs)
+    img_paths = [os.path.join(path, x) for x in imgs]
+    for ipath in tqdm(img_paths):
+        frame = cv2.imread(ipath)
+        yield frame, ipath

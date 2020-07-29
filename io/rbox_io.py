@@ -21,6 +21,8 @@ def write_txt_coco(anno_coco, txt_path):
 
 def read_txt_yolo_pred(txt_source, rbox_type):
     ### TODO: make sure the yolo prediction format
+    """yolo xywhr prediction format: frame_id x y w h r class_id conf
+    xywhr are raw, not normalized. See detect.py in yolov3"""
     assert rbox_type in ["xywhr", "xy8"]
 
     with open(txt_source) as f:

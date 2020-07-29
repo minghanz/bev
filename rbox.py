@@ -43,6 +43,21 @@ def yaw2mat(x, mode):
 
     return y
 
+def xy82xywhr(xy8, mode):
+    assert mode in ["bev", "world"]
+
+    top_left = xy8[:, 0:2]
+    bot_left = xy8[:, 2:4]
+    top_right = xy8[:, 6:8]
+    w = np.sqrt(((top_right - top_left)**2).sum(1, keepdims=True))
+    h = np.sqrt(((bot_left - top_left)**2).sum(1, keepdims=True))
+    xy = 0.5*(bot_left + top_right)
+    vec = top_left - bot_left
+    r = v2yaw(vec, mode).reshape(-1, 1)
+
+    xywhr = np.concatenate([xy, w, h, r], axis=1)
+    return xywhr
+
 def xywhr2xyxy(x, mode, external_aa=False):
     assert mode in ["bev", "world"]
     # convert n*5 boxes from [x,y,w,h,yaw] to [x1, y1, x2, y2] if external_aa, 

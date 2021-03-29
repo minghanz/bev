@@ -10,7 +10,27 @@ def lin_iou(box1, box2, rbox2=None):
 
     dist = np.sqrt(((box1[:, None, :2] - box2[:, :2])**2).sum(axis=2))
 
-    dist_ratio = (1 - dist / rbox2[:, 3]).clip(0)
+    dist_ratio = 1 - dist / rbox2[:, 3]
+
+    return dist_ratio
+
+def lin_iou_ellipsoid(box1, box2, rbox2=None):
+    """returns the ratio of center estimation error to box length. """
+    # inter = (torch.min(box1[:, None, 2:], box2[:, 2:]) - torch.max(box1[:, None, :2], box2[:, :2])).clamp(0).prod(2)
+
+    distxy = box1[:, None, :2] - box2[:, :2]
+    long_axis = np.stack([np.cos(rbox2[:, 4]), np.sin(rbox2[:, 4])], axis=1)
+    lat_axis = np.stack([np.sin(rbox2[:, 4]), -np.cos(rbox2[:, 4])], axis=1)
+    dist_proj_long = (distxy * long_axis).sum(axis=2)
+    dist_proj_lat = (distxy * lat_axis).sum(axis=2)
+    
+    h_ref = np.clip(rbox2[:, 3], a_min=1e-5, a_max=None)
+    w_ref = np.clip(rbox2[:, 2], a_min=1e-5, a_max=None)
+    dist_elli_sqr = (dist_proj_lat / w_ref)**2 + (dist_proj_long / h_ref)**2
+    dist_elli_sqr = np.sqrt(dist_elli_sqr)
+
+    # dist_ratio = (1 - dist_elli_sqr).clip(0)
+    dist_ratio = 1 - dist_elli_sqr
 
     return dist_ratio
 

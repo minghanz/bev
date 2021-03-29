@@ -59,6 +59,23 @@ def read_txt_blender(txt_source):
 
     return anno_blender
 
+def read_txt_blender_rboxzt(txt_source):
+    ##### generate annotation file in the format of yolov3 as described in https://github.com/ultralytics/yolov3/wiki/Train-Custom-Data
+    txt_content = read_txt_to_dict(txt_source) # read_calib_file
+    # with open(txt_target, "w") as f:
+    n_obj = len([key for key in txt_content if "center" in key])
+    anno_blender = np.zeros((n_obj, 7))
+    for i in range(n_obj):
+        center = txt_content["center"] if "center" in txt_content else txt_content["center_%d"%i]
+        center = center[:2] # x,y in world coordinate
+        lwh_yaw_scale = txt_content["lwh_yaw_scale"] if "lwh_yaw_scale" in txt_content else txt_content["lwh_yaw_scale_%d"%i]
+        l = lwh_yaw_scale[0]
+        w = lwh_yaw_scale[1]
+        h = lwh_yaw_scale[2]
+        yaw = lwh_yaw_scale[3]
+        anno_blender[i] = center[0],center[1],w,l,yaw,0,h
+
+    return anno_blender
 
 def read_txt_blender_to_coco(txt_source, H_world2bev, width, height):
     ##### generate annotation file in the format of yolov3 as described in https://github.com/ultralytics/yolov3/wiki/Train-Custom-Data
@@ -87,17 +104,23 @@ def read_txt_blender_to_coco(txt_source, H_world2bev, width, height):
 
     return anno_coco
 
-def read_txt_kitti_to_coco(txt_source, H_world2bev, width, height):
+def read_txt_kitti(txt_source):
     ### kitti cam coordinate: x-right, y-down, z-front
     with open(txt_source) as f:
         lines = f.readlines()
 
     class_names = [line.split()[0] for line in lines]
     wanted_names = ["Car", "Van", "Truck"]
-    wanted_items = [x in wanted_names for x in class_names]
+    wanted_items = [x in wanted_names for x in class_names] ### a boolean list
 
     rbox_hwlxyzr = np.array([[float(x) for x in line.split()[8:15]] for line in lines])
     rbox_hwlxyzr = rbox_hwlxyzr[wanted_items]
+
+    return rbox_hwlxyzr
+
+def read_txt_kitti_to_coco(txt_source, H_world2bev, width, height):
+
+    rbox_hwlxyzr = read_txt_kitti(txt_source)
 
     xywhr = kitti2world(rbox_hwlxyzr)
     anno_bev = rbox_world_bev(xywhr, H_world2bev, src="world")

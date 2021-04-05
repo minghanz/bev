@@ -86,9 +86,9 @@ def iou_batch(bb_test, bb_gt):
 
 def iou_batch_rbox(bb_test, bb_gt):
   bb_test_ = bb_test.copy()
-  bb_test_[:, 4] = - bb_test[:, 4]
+  bb_test_[:, 4] = bb_test[:, 4] + np.pi/2  # best tracking (least vehicle numbers)
   bb_gt_ = bb_gt[:, :5].copy()
-  bb_gt_[:, 4] = - bb_gt[:, 4]
+  bb_gt_[:, 4] = bb_gt[:, 4]+ np.pi/2
   return d3d.box.box2d_iou(bb_test_, bb_gt_, method="rbox")
 
 def iou_batch_ellipsoid(bb_test, bb_gt):

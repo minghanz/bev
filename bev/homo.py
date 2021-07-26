@@ -44,13 +44,20 @@ def get_K_from_f_pp(focal, pp):
     K = np.array([[focal, 0, pp[0]], [0, focal, pp[1]], [0, 0, 1]])
     return K
 
+def get_K_from_vps(vp1, vp2, pp):
+    focal = get_focal(vp1, vp2, pp)
+    K = get_K_from_f_pp(focal, pp)
+    return K, focal
+
 def homo_from_vps(vp1, vp2, height, u_size, v_size, pp=None):
-    """vp1, vp2 are arrays of length 2 (u,v)"""
+    """vp1, vp2 are arrays of length 2 (u,v)
+    Fully automatic roadside camera calibration for traffic surveillance, Dubská, 2015"""
     if pp is None:
         pp = np.array([(u_size-1)*0.5, (v_size-1)*0.5])
-    focal = get_focal(vp1, vp2, pp)
 
-    K = get_K_from_f_pp(focal, pp)
+    # focal = get_focal(vp1, vp2, pp)
+    # K = get_K_from_f_pp(focal, pp)
+    K, focal = get_K_from_vps(vp1, vp2, pp)
 
     vp1W = np.concatenate((vp1, [focal]))    
     vp2W = np.concatenate((vp2, [focal]))    
@@ -88,6 +95,18 @@ def homo_from_vps(vp1, vp2, height, u_size, v_size, pp=None):
 
     return H_img_world
 
+def get_vps_from_homo(H_img_world):
+    """pp: principle point"""
+    vp1 = np.array([H_img_world[0,0]/H_img_world[2,0], H_img_world[1,0]/H_img_world[2,0]])
+    vp2 = np.array([H_img_world[0,1]/H_img_world[2,1], H_img_world[1,1]/H_img_world[2,1]])
+    return vp1, vp2
+
+def get_KRt_from_homo(H_img_world, pp):
+    """Calculate the intrinsic and extrinsic matrices from homography and camera principle points. """
+    vp1, vp2 = get_vps_from_homo(H_img_world)
+    K, focal = get_K_from_vps(vp1, vp2, pp)
+    R, t = Rt_from_homo_K(H_img_world, K)
+    return K, focal, R, t
 
 def Rt_from_homo_K(H_img_world, K):
     """https://docs.opencv.org/master/d9/dab/tutorial_homography.html"""

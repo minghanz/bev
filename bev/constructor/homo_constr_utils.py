@@ -106,7 +106,7 @@ def load_T(name, cam_id):
     return fx, fy, cx, cy, T
 
 def load_spec_dict_bev(u_size, v_size, name, cam_id=None, calib=None):
-    assert name in ["lturn", "KoPER", "CARLA", "roundabout", "BrnoCompSpeed"]
+    assert name in ["lturn", "KoPER", "CARLA", "roundabout", "BrnoCompSpeed", "rounD", "rounD_raw"]
     arg_dict = {}
     arg_dict["u_size"] = u_size
     arg_dict["v_size"] = v_size
@@ -199,6 +199,64 @@ def load_spec_dict_bev(u_size, v_size, name, cam_id=None, calib=None):
             arg_dict["u_axis"] = u_axis
             arg_dict["v_axis"] = v_axis
 
+    elif name == "rounD":
+
+        if cam_id == 0:
+            x_min = 0
+            y_max = 0
+            u_axis = "x"
+            v_axis = "-y"
+            u_size = 1544
+            v_size = 936
+            m_per_px = 0.0148098329880904
+        elif cam_id == 1:
+            u_size = 1678
+            v_size = 936
+            m_per_px = 0.0136334127882737
+        elif cam_id >= 2:
+            x_center = 96
+            y_center = -17.2
+            u_axis = "x"
+            v_axis = "-y"
+            u_size = 1678
+            v_size = 936
+            m_per_px = 0.0101601513616589
+        else:
+            raise ValueError("cam_id {} not recognized. ".format(cam_id))
+        
+        x_size = u_size * m_per_px * 10
+        y_size = v_size * m_per_px * 10     # scale_down_factor in drone-dataset-tools
+
+        if cam_id >= 2:
+            x_min = x_center - x_size / 2
+            y_max = y_center + y_size / 2
+
+        arg_dict["x_min"] = x_min
+        arg_dict["x_size"] = x_size
+        arg_dict["y_max"] = y_max
+        arg_dict["y_size"] = y_size
+        arg_dict["u_axis"] = u_axis
+        arg_dict["v_axis"] = v_axis
+
+    elif name == "rounD_raw":
+        if cam_id == 2:
+            x_min = 0
+            y_max = 0
+            u_axis = "x"
+            v_axis = "-y"
+            u_size = 1678
+            v_size = 936
+            m_per_px = 0.0101601513616589
+
+        x_size = u_size * m_per_px * 10
+        y_size = v_size * m_per_px * 10     # scale_down_factor in drone-dataset-tools
+
+        arg_dict["x_min"] = x_min
+        arg_dict["x_size"] = x_size
+        arg_dict["y_max"] = y_max
+        arg_dict["y_size"] = y_size
+        arg_dict["u_axis"] = u_axis
+        arg_dict["v_axis"] = v_axis
 
     elif name == "CARLA":
         # if cam_id == 3:

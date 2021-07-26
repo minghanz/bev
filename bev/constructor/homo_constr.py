@@ -40,7 +40,7 @@ def load_calib(dataset_name, fpath):
 
 
 def preset_bspec(dataset_name, sub_id=None, calib=None):
-    assert dataset_name in ["lturn", "KoPER", "kitti", "CARLA", "roundabout", "BrnoCompSpeed"]
+    assert dataset_name in ["lturn", "KoPER", "kitti", "CARLA", "roundabout", "BrnoCompSpeed", "rounD", "rounD_raw"]
 
     if dataset_name == "lturn":
         #### world to bev homography
@@ -92,6 +92,22 @@ def preset_bspec(dataset_name, sub_id=None, calib=None):
         # bev_height = bev_mask.shape[0] #544#480 #544 # 624
         bev_width = 544
         bev_height = 544
+
+        spec_dict = load_spec_dict_bev(bev_width, bev_height, dataset_name, sub_id)
+        bspec = BEVWorldSpec(**spec_dict)
+
+    elif dataset_name == "rounD" or dataset_name == "rounD_raw":
+        if sub_id == 0:
+            bev_width = 1544
+            bev_height = 936
+        elif sub_id == 1:
+            bev_width = 1678
+            bev_height = 936
+        elif sub_id >= 2:
+            bev_width = 1678
+            bev_height = 936
+        else:
+            raise ValueError("sub_id {} not recognized. ".format(sub_id))
 
         spec_dict = load_spec_dict_bev(bev_width, bev_height, dataset_name, sub_id)
         bspec = BEVWorldSpec(**spec_dict)

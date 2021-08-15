@@ -90,7 +90,8 @@ def video_generator(video_name, height=None, width=None, img_folder=None, fps=30
                 filename=video_name,
                 # some installation of opencv may not support x264 (due to its license),
                 # you can try other format (e.g. MPEG)
-                # fourcc = cv2.VideoWriter_fourcc('M','J','P','G'),cv2.VideoWriter_fourcc(*"x264"),
+                # fourcc=cv2.VideoWriter_fourcc('M','J','P','G')
+                # fourcc=cv2.VideoWriter_fourcc(*"mp4v"),
                 fourcc=cv2.VideoWriter_fourcc(*"x264"),
                 fps=float(fps),
                 frameSize=(width, height),

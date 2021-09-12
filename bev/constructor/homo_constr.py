@@ -3,6 +3,10 @@ from .homo_constr_utils import load_pts, load_T, load_spec_dict_bev, load_calib_
 from ..calib import Calib
 from ..bev import BEVWorldSpec
 
+import os
+import yaml
+import copy
+
 def preset_calib(dataset_name, sub_id=None):
     assert dataset_name in ["lturn", "KoPER", "roundabout"]
     if dataset_name in ["lturn", "roundabout"]:
@@ -149,3 +153,78 @@ def preset_bspec(dataset_name, sub_id=None, calib=None):
 
     return bspec
 
+def cfg_path_from_dataset_id(dataset_name, sub_id):
+    """return the path of the yaml config file based on the dataset name and sub_id. """
+    id_str = str(sub_id).replace('.', '_')
+    fname = "{}_{}.yaml".format(dataset_name, id_str)
+
+    cur_dir = os.path.dirname(os.path.abspath(__file__))
+    fpath = os.path.join(cur_dir, 'configs_bspec', fname)
+    if not os.path.exists(fpath):
+        id_str = str(sub_id).split('.')[0]
+        fname = "{}_{}.yaml".format(dataset_name, id_str)
+        fpath = os.path.join(cur_dir, 'configs_bspec', fname)
+        assert os.path.exists(fpath), "Not exist: {}".format(fpath)
+    return fpath
+
+def load_bspec_from_cfg(cfg, calib=None):
+    """load bspec from a cfg dict (probably loaded from yaml). """
+    mode = cfg['mode']
+    spec_dict = copy.deepcopy(cfg['spec'])
+
+    if 'm_per_px' in spec_dict:
+        img_size = spec_dict['u_size'] if 'x' in spec_dict['u_axis'] else spec_dict['v_size']
+        spec_dict['x_size'] = img_size * spec_dict['m_per_px']
+
+        img_size = spec_dict['u_size'] if 'y' in spec_dict['u_axis'] else spec_dict['v_size']
+        spec_dict['y_size'] = img_size * spec_dict['m_per_px']
+        del spec_dict['m_per_px']
+
+    if mode == 'abs':
+        pass
+
+    elif mode == 'offset':
+        assert calib is not None, "when using `offset` mode, \
+            `calib` must be given to calculate the world coordinate of the center of the original view image"
+        center = calib.gen_center_in_world()
+
+        assert ('x_max_off' in spec_dict or 'x_min_off' in spec_dict), "when using `offset` mode, \
+            either `x_min_off` or `x_max_off` must be given. "
+
+        assert ('y_max_off' in spec_dict or 'y_min_off' in spec_dict), "when using `offset` mode, \
+            either `y_min_off` or `y_max_off` must be given. "
+
+        if 'x_min_off' in spec_dict:
+            spec_dict['x_min'] = center[0] + spec_dict['x_min_off']
+            del spec_dict['x_min_off']
+        if 'x_max_off' in spec_dict:
+            spec_dict['x_max'] = center[0] + spec_dict['x_max_off']
+            del spec_dict['x_max_off']
+        if 'y_min_off' in spec_dict:
+            spec_dict['y_min'] = center[1] + spec_dict['y_min_off']
+            del spec_dict['y_min_off']
+        if 'y_max_off' in spec_dict:
+            spec_dict['y_max'] = center[1] + spec_dict['y_max_off']
+            del spec_dict['y_max_off']
+
+    elif mode =='centered':
+        assert calib is not None, "when using `centered` mode, \
+            `calib` must be given to calculate the world coordinate of the center of the original view image"
+        center = calib.gen_center_in_world()
+
+        spec_dict['x_min'] = center[0] - spec_dict['x_size'] * 0.5
+        spec_dict['y_min'] = center[1] - spec_dict['y_size'] * 0.5
+    else:
+        raise ValueError("mode {} not recognized".format(mode))
+
+    bspec = BEVWorldSpec(**spec_dict)
+    return bspec
+
+def load_bspec(dataset_name, sub_id=None, calib=None):
+    """load bspec using yaml config files, instead of hard-coding (preset_bspec). """
+    cfg_path = cfg_path_from_dataset_id(dataset_name, sub_id)
+    with open(cfg_path) as f:
+        cfg = yaml.load(f)
+    
+    bspec = load_bspec_from_cfg(cfg, calib)
+    return bspec

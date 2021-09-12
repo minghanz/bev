@@ -4,7 +4,7 @@ import cv2
 import numpy as np
 import os
 
-from bev.constructor.homo_constr import load_calib, preset_bspec
+from bev.constructor.homo_constr import load_calib, preset_bspec, load_bspec
 from bev.io.utils import video_generator
 from bev.visualizer.homo_vis import vis_bspec_and_calib_in_grid
 if __name__ == "__main__":
@@ -55,7 +55,8 @@ if __name__ == "__main__":
 
     video = cv2.VideoCapture(video_path)    
     calib = load_calib("BrnoCompSpeed", calib_path)
-    bspec = preset_bspec("BrnoCompSpeed", cam_id, calib)
+    # bspec = preset_bspec("BrnoCompSpeed", cam_id, calib)
+    bspec = load_bspec("BrnoCompSpeed", sub_id=cam_id, calib=calib)
 
     H_world_img = calib.gen_H_world_img()
     H_world_bev =  bspec.gen_H_world_bev()

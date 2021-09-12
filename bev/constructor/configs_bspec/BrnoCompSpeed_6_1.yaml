@@ -1,0 +1,10 @@
+mode: offset  # offset/centered/abs
+spec:
+  u_size: 320
+  v_size: 640
+  x_min_off: -28
+  y_min_off: -18
+  x_size: 80
+  y_size: 40
+  u_axis: 'y'
+  v_axis: '-x'

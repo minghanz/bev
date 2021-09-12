@@ -18,7 +18,7 @@ def grid_pts_pair_from_grid_coords(grid_x, grid_y):
 
 def draw_homography(img, H_img_world, grid_x, grid_y, ax_ori_x=0, ax_ori_y=0):
     """This function draws grid and coordinate arrows to visualize homography"""
-    grid_color = (0,0,0)
+    grid_color = (255,255,0)
     grid_pts_pairs = grid_pts_pair_from_grid_coords(grid_x, grid_y) # n*2*2
     grid_pts_pairs = np.dstack((grid_pts_pairs, np.ones((grid_pts_pairs.shape[0], 2, 1), dtype=grid_pts_pairs.dtype)) ) # n*2*3
     grid_pts_pairs = grid_pts_pairs.reshape(-1, 3).transpose() # 4*n
@@ -28,7 +28,7 @@ def draw_homography(img, H_img_world, grid_x, grid_y, ax_ori_x=0, ax_ori_y=0):
     grid_pts_pairs_proj = grid_pts_pairs_proj[:2].transpose().reshape(-1, 2, 2) # n*2*2
     grid_pts_pairs_proj = np.round(grid_pts_pairs_proj).astype(int)
     for i in range(grid_pts_pairs_proj.shape[0]):
-        cv2.line(img, tuple(grid_pts_pairs_proj[i,0]), tuple(grid_pts_pairs_proj[i,1]), grid_color)
+        cv2.line(img, tuple(grid_pts_pairs_proj[i,0]), tuple(grid_pts_pairs_proj[i,1]), grid_color, lineType=cv2.LINE_AA)
 
     axis_pts_pairs = np.array([[ax_ori_x,ax_ori_y], [ax_ori_x+1,ax_ori_y], [ax_ori_x,ax_ori_y], [ax_ori_x,ax_ori_y+1]], dtype=np.float32)
 
